@@ -9,7 +9,7 @@
   let userID = $state(null)
   let dragOver = $state(false)
   let selectedFiles = $state(new Set())
-  let previewFile = $state(null)       // { name, url, type }
+  let previewFile = $state(null)
   let renameFileId = $state(null)
   let renameText = $state('')
 
@@ -36,7 +36,6 @@
     uploading = true
     for (const file of fileList) {
       try {
-        // 1. Get presigned URL from our server endpoint
         const presignedRes = await fetch('/api/presigned-upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -45,7 +44,6 @@
         const { url, key } = await presignedRes.json()
         if (!url) throw new Error('Failed to get upload URL')
 
-        // 2. Upload directly to R2
         const uploadRes = await fetch(url, {
           method: 'PUT',
           body: file,
@@ -53,7 +51,6 @@
         })
         if (!uploadRes.ok) throw new Error('Upload to R2 failed')
 
-        // 3. Save metadata to Supabase
         const { error: dbError } = await supabase
           .from('files')
           .insert({
@@ -77,7 +74,6 @@
     const toDelete = files.filter(f => selectedFiles.has(f.id))
     for (const file of toDelete) {
       await supabase.from('files').delete().eq('id', file.id)
-      // Optionally delete from R2, but skip for now
     }
     selectedFiles = new Set()
     await loadFiles()
@@ -111,8 +107,8 @@
         previewFile = { name: file.name, url, type: file.mime_type }
       } catch (e) { alert('Preview error: ' + e.message) }
     } else {
-      // For other types, just download
-      window.open(await getShareLinkDirect(file.storage_path), '_blank')
+      const url = await getShareLinkDirect(file.storage_path)
+      window.open(url, '_blank')
     }
   }
 
@@ -140,7 +136,6 @@
   async function createFolder() {
     const name = prompt('Enter folder name:')
     if (!name) return
-    // Folders are just entries with size=0 and mime_type='folder'
     const { error } = await supabase.from('files').insert({
       user_id: userID,
       name: name,
@@ -192,19 +187,17 @@
   <div class="p-4 max-w-4xl mx-auto">
     <h1 class="text-3xl font-bold mb-4">My Cloud Storage</h1>
 
-    <!-- Breadcrumb -->
     <div class="mb-2 text-sm text-gray-600 dark:text-gray-400">
       📁
-      <button on:click={() => { folder='/'; loadFiles() }} class="hover:underline">Home</button>
+      <button onclick={() => { folder='/'; loadFiles() }} class="hover:underline">Home</button>
       {#each folder.split('/').filter(Boolean) as part, i}
-        / <button on:click={() => {
+        / <button onclick={() => {
           folder = '/' + folder.split('/').slice(1, i+1).join('/')
           loadFiles()
         }} class="hover:underline">{part}</button>
       {/each}
     </div>
 
-    <!-- Upload zone -->
     <div
       class="border-2 border-dashed rounded-lg p-8 text-center mb-4 transition-colors"
       class:border-blue-400={dragOver}
@@ -212,6 +205,8 @@
       ondragover={(e) => { e.preventDefault(); dragOver = true }}
       ondragleave={() => dragOver = false}
       ondrop={handleDrop}
+      role="region"
+      aria-label="file upload area"
     >
       <label class="cursor-pointer">
         <span class="text-gray-500 dark:text-gray-400">Drag & drop files here, or</span>
@@ -224,14 +219,12 @@
       <p class="text-blue-500">Uploading...</p>
     {/if}
 
-    <!-- Selection toolbar -->
     {#if selectedFiles.size > 0}
       <div class="mb-2">
         <button onclick={deleteSelected} class="bg-red-500 text-white px-3 py-1 rounded">Delete selected ({selectedFiles.size})</button>
       </div>
     {/if}
 
-    <!-- File list -->
     <div class="bg-white dark:bg-gray-800 rounded shadow">
       {#if files.length === 0}
         <p class="text-gray-400 dark:text-gray-500 p-4">No files yet.</p>
@@ -246,7 +239,7 @@
                 {#if renameFileId === file.id}
                   <input type="text" bind:value={renameText} onkeydown={(e) => e.key === 'Enter' && renameFile(file.id, renameText)} class="border p-1 text-sm" />
                 {:else}
-                  <p class="font-medium cursor-pointer" on:click={() => navigateToFolder(file.name)}>{file.name}</p>
+                  <p class="font-medium cursor-pointer" onclick={() => navigateToFolder(file.name)}>{file.name}</p>
                 {/if}
                 <p class="text-xs text-gray-500 dark:text-gray-400">Folder</p>
               </div>
@@ -277,7 +270,6 @@
   </div>
 </div>
 
-<!-- Preview Modal -->
 {#if previewFile}
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onclick={() => previewFile = null}>
     <div class="bg-white dark:bg-gray-800 p-4 rounded max-w-3xl max-h-[90vh] overflow-auto" onclick={(e) => e.stopPropagation()}>
