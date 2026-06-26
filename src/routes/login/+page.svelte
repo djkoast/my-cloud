@@ -17,7 +17,7 @@
 
   async function handleSignUp() {
     try {
-      const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+      const res = await fetch(SUPABASE_URL + '/auth/v1/signup', {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -47,5 +47,6 @@
       <button onclick={handleSignUp} class="bg-green-500 text-white px-4 py-2 rounded flex-1">Sign Up</button>
     </div>
     {#if message}<p class="text-red-500 text-sm">{message}</p>{/if}
+    <a href="/forgot-password" class="text-sm text-gray-500 hover:underline">Forgot password?</a>
   </div>
 </div>
