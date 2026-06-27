@@ -2,7 +2,7 @@
   import { onMount } from 'svelte'
   import { supabase } from '$lib/supabase'
   import { goto } from '$app/navigation'
-  import { Loader2, File, Folder, Upload, Trash2, Share2, Pencil, Search, Moon, Sun, LogOut, History, ChevronRight, Plus, X, Image, Video, FileText, Cloud, ArrowLeft, Link2 } from 'lucide-svelte'
+  import { Loader2, FolderPlus, UploadCloud, Trash2, Share2, Pencil, Search, Sun, Moon, LogOut, History, File, Folder, Image, Video, FileText, ChevronRight, X, Link2, Heart, TreePine, Music, Palette, CloudRain } from 'lucide-svelte'
 
   let files = $state([])
   let sharedFiles = $state([])
@@ -24,9 +24,7 @@
   let showVersionsModal = $state(false)
   let versionsList = $state([])
   let versionsFileName = $state('')
-  let sidebarOpen = $state(false)
 
-  // Reuse existing functions (identical to previous version, no changes needed)
   onMount(async () => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { goto('/login'); return }
@@ -193,9 +191,9 @@
       const { url } = await res.json()
       if (!url) throw new Error('Could not get share link')
       await navigator.clipboard.writeText(url)
-      alert('Link copied to clipboard!')
+      alert('Link copied!')
     } catch (err) {
-      alert('Share error: ' + err.message)
+      alert('Error: ' + err.message)
     }
   }
 
@@ -238,7 +236,7 @@
   }
 
   async function createFolder() {
-    const name = prompt('Enter folder name:')
+    const name = prompt('Folder name:')
     if (!name) return
     const { error } = await supabase.from('files').insert({
       user_id: userID,
@@ -248,7 +246,7 @@
       mime_type: 'folder',
       storage_path: '',
     })
-    if (error) alert('Folder creation failed: ' + error.message)
+    if (error) alert('Failed: ' + error.message)
     await loadMyFiles()
   }
 
@@ -274,12 +272,12 @@
     })
     const result = await res.json()
     if (result.success) {
-      alert('Shared successfully!')
+      alert('Shared!')
       showShareModal = false
       shareEmail = ''
       shareFileId = null
     } else {
-      alert('Error: ' + (result.error || 'Failed to share'))
+      alert('Error: ' + (result.error || 'Failed'))
     }
   }
 
@@ -289,10 +287,7 @@
       .select('*')
       .eq('file_id', fileId)
       .order('version_number', { ascending: false })
-    if (error) {
-      alert('Error loading versions: ' + error.message)
-      return
-    }
+    if (error) { alert('Error: ' + error.message); return }
     versionsList = data || []
     versionsFileName = fileName
     showVersionsModal = true
@@ -300,15 +295,13 @@
 
   async function downloadVersion(storagePath) {
     if (!storagePath) return
-    try {
-      const res = await fetch('/api/presigned-download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: storagePath }),
-      })
-      const { url } = await res.json()
-      if (url) window.open(url, '_blank')
-    } catch (e) { alert('Failed to get download link') }
+    const res = await fetch('/api/presigned-download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: storagePath }),
+    })
+    const { url } = await res.json()
+    if (url) window.open(url, '_blank')
   }
 
   async function logout() {
@@ -317,340 +310,280 @@
   }
 </script>
 
-<!-- Full redesigned UI with sidebar, glassmorphism, professional file list -->
-<div class="flex h-screen overflow-hidden bg-surface-50 dark:bg-surface-950">
-  <!-- Sidebar -->
-  <aside class="w-64 flex-shrink-0 bg-white dark:bg-surface-900 border-r border-surface-200 dark:border-surface-800 flex flex-col transition-all duration-300 {sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:static z-30 h-full">
-    <div class="p-6 border-b border-surface-200 dark:border-surface-800">
-      <div class="flex items-center gap-2 text-xl font-bold text-surface-900 dark:text-white">
-        <div class="w-8 h-8 bg-accent-600 rounded-lg flex items-center justify-center text-white">☁️</div>
-        MyCloud
+<div class="min-h-screen bg-gradient-to-br from-[#1b2f1d] via-[#2e4a2e] to-[#1b2f1d] text-[#f5f0e6] p-4 md:p-8 flex flex-col items-center">
+  <!-- Centered container -->
+  <div class="w-full max-w-7xl mx-auto">
+    
+    <!-- Hero – poetic, nature‑inspired -->
+    <div class="text-center mb-14 animate-fade-in">
+      <div class="inline-flex items-center justify-center gap-3 mb-6">
+        <TreePine class="w-10 h-10 text-[#a3b18a]" />
+        <Music class="w-8 h-8 text-[#e07a5f]" />
+        <Palette class="w-8 h-8 text-[#f4a261]" />
+        <Heart class="w-10 h-10 text-[#f2cc8f]" />
       </div>
-    </div>
-    <nav class="flex-1 p-4 space-y-2">
-      <button
-        onclick={() => { tab = 'myfiles'; sidebarOpen = false }}
-        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors {tab === 'myfiles' ? 'bg-accent-50 dark:bg-accent-900/20 text-accent-700 dark:text-accent-400 font-medium' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'}"
-      >
-        <File class="w-5 h-5" />
-        My Files
-      </button>
-      <button
-        onclick={() => { tab = 'shared'; sidebarOpen = false }}
-        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors {tab === 'shared' ? 'bg-accent-50 dark:bg-accent-900/20 text-accent-700 dark:text-accent-400 font-medium' : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'}"
-      >
-        <Share2 class="w-5 h-5" />
-        Shared with Me
-      </button>
-    </nav>
-    <div class="p-4 border-t border-surface-200 dark:border-surface-800 flex items-center gap-3">
-      <button
-        onclick={() => document.documentElement.classList.toggle('dark')}
-        class="w-10 h-10 rounded-xl bg-surface-100 dark:bg-surface-800 flex items-center justify-center text-surface-600 dark:text-surface-400 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors"
-        title="Toggle dark mode"
-      >
-        <Moon class="w-5 h-5 hidden dark:block" />
-        <Sun class="w-5 h-5 block dark:hidden" />
-      </button>
-      <button
-        onclick={logout}
-        class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
-      >
-        <LogOut class="w-4 h-4" />
-        Logout
-      </button>
-    </div>
-  </aside>
-
-  <!-- Mobile sidebar overlay -->
-  {#if sidebarOpen}
-    <div class="fixed inset-0 bg-black/20 backdrop-blur-sm z-20 md:hidden" onclick={() => sidebarOpen = false}></div>
-  {/if}
-
-  <!-- Main content -->
-  <main class="flex-1 overflow-y-auto">
-    <!-- Top bar (mobile) -->
-    <div class="sticky top-0 z-10 bg-white/80 dark:bg-surface-900/80 backdrop-blur-lg border-b border-surface-200 dark:border-surface-800 p-4 flex items-center gap-3 md:hidden">
-      <button onclick={() => sidebarOpen = true} class="w-10 h-10 rounded-xl bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
-      <h1 class="text-lg font-bold">MyCloud</h1>
-    </div>
-
-    <div class="p-6 max-w-5xl mx-auto">
-      <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-        <div>
-          <h1 class="text-3xl font-bold text-surface-900 dark:text-white">
-            {tab === 'myfiles' ? 'My Files' : 'Shared with Me'}
-          </h1>
-          <p class="text-surface-500 dark:text-surface-400 mt-1">
-            {tab === 'myfiles' ? 'Manage your personal files' : 'Files shared with you'}
-          </p>
-        </div>
+      <h1 class="text-5xl md:text-7xl font-serif font-bold text-[#f5f0e6] mb-4 tracking-tight">
+        {tab === 'myfiles' ? 'My Garden of Files' : 'Shared with Love'}
+      </h1>
+      <p class="text-lg md:text-xl text-[#cfc5b0] max-w-2xl mx-auto italic">
+        {tab === 'myfiles' ? 'A place where your digital moments bloom like wildflowers. Plant a file, watch it grow.' : 'Treasured gifts from kindred spirits, waiting for your touch.'}
+      </p>
+      <div class="mt-6 flex justify-center gap-3">
         {#if tab === 'myfiles'}
-          <div class="flex gap-2">
-            <button
-              onclick={createFolder}
-              class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl text-sm font-medium text-surface-700 dark:text-surface-200 hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors active:scale-[0.98]"
-            >
-              <Plus class="w-4 h-4" />
-              New Folder
-            </button>
-            <label class="inline-flex items-center gap-2 px-4 py-2.5 bg-accent-600 hover:bg-accent-700 text-white rounded-xl text-sm font-medium cursor-pointer transition-colors active:scale-[0.98]">
-              <Upload class="w-4 h-4" />
-              Upload
-              <input type="file" multiple class="hidden" onchange={uploadFiles} />
-            </label>
-          </div>
+          <button onclick={createFolder} class="inline-flex items-center gap-2 px-6 py-3 bg-[#3d405b]/40 hover:bg-[#3d405b]/60 border border-[#a3b18a]/30 rounded-full text-[#f5f0e6] font-medium transition-all duration-300 backdrop-blur-sm">
+            <FolderPlus class="w-5 h-5" />
+            New Folder
+          </button>
+          <label class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#e07a5f] to-[#f4a261] hover:from-[#d06a4f] hover:to-[#e08a51] rounded-full text-white font-medium cursor-pointer transition-all duration-300 shadow-lg shadow-[#e07a5f]/20">
+            <UploadCloud class="w-5 h-5" />
+            Upload
+            <input type="file" multiple class="hidden" onchange={uploadFiles} />
+          </label>
         {/if}
+        <button onclick={logout} class="inline-flex items-center gap-2 px-5 py-3 text-[#cfc5b0] hover:text-white transition-colors">
+          <LogOut class="w-5 h-5" />
+          <span class="hidden md:inline">Leave Garden</span>
+        </button>
       </div>
+    </div>
 
-      <!-- Search -->
-      <div class="relative mb-6">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
+    <!-- Tabs & Search -->
+    <div class="flex flex-col sm:flex-row gap-4 mb-8">
+      <div class="flex gap-2 p-1 bg-[#3d405b]/30 backdrop-blur-md border border-[#a3b18a]/20 rounded-full">
+        <button onclick={() => tab = 'myfiles'} class="px-6 py-2.5 rounded-full font-medium transition-all duration-300 {tab === 'myfiles' ? 'bg-[#e07a5f] text-white shadow-lg' : 'text-[#cfc5b0] hover:text-white'}">
+          My Garden
+        </button>
+        <button onclick={() => tab = 'shared'} class="px-6 py-2.5 rounded-full font-medium transition-all duration-300 {tab === 'shared' ? 'bg-[#e07a5f] text-white shadow-lg' : 'text-[#cfc5b0] hover:text-white'}">
+          Shared with Me
+        </button>
+      </div>
+      <div class="relative flex-1">
+        <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a3b18a]" />
         <input
           type="text"
-          placeholder="Search files..."
-          class="w-full pl-10 pr-4 py-3 border border-surface-200 dark:border-surface-700 rounded-xl bg-white dark:bg-surface-800 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent text-surface-900 dark:text-white placeholder:text-surface-400 transition-all"
+          placeholder="Search your garden..."
+          class="w-full pl-12 pr-4 py-3 bg-[#3d405b]/30 backdrop-blur-md border border-[#a3b18a]/20 rounded-full text-[#f5f0e6] placeholder:text-[#a3b18a] focus:outline-none focus:ring-2 focus:ring-[#e07a5f] focus:border-transparent transition-all"
           bind:value={searchQuery}
         />
       </div>
-
-      <!-- Breadcrumb (my files only) -->
-      {#if tab === 'myfiles'}
-        <div class="flex items-center gap-1 mb-4 text-sm text-surface-500 dark:text-surface-400 overflow-x-auto whitespace-nowrap pb-2">
-          <button onclick={() => { folder='/'; loadMyFiles() }} class="hover:text-accent-600 transition-colors flex items-center gap-1">
-            <Folder class="w-4 h-4" />
-            Home
-          </button>
-          {#each folder.split('/').filter(Boolean) as part, i}
-            <ChevronRight class="w-4 h-4 mx-1" />
-            <button
-              onclick={() => {
-                folder = '/' + folder.split('/').slice(1, i+1).join('/')
-                loadMyFiles()
-              }}
-              class="hover:text-accent-600 transition-colors"
-            >
-              {part}
-            </button>
-          {/each}
-        </div>
-      {/if}
-
-      <!-- Upload zone (empty state) -->
-      {#if tab === 'myfiles' && !loading && files.length === 0 && !searchQuery}
-        <div
-          class="border-2 border-dashed border-surface-300 dark:border-surface-700 rounded-2xl p-12 text-center mb-6 transition-all"
-          class:border-accent-400={dragOver}
-          class:bg-accent-50/50={dragOver}
-          ondragover={(e) => { e.preventDefault(); dragOver = true }}
-          ondragleave={() => dragOver = false}
-          ondrop={handleDrop}
-          role="region"
-          aria-label="file upload area"
-        >
-          <label class="cursor-pointer flex flex-col items-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-accent-50 dark:bg-accent-900/20 flex items-center justify-center text-accent-600">
-              <Upload class="w-8 h-8" />
-            </div>
-            <div>
-              <p class="text-surface-700 dark:text-surface-200 font-medium">Drag & drop files here</p>
-              <p class="text-surface-400 dark:text-surface-500 text-sm mt-1">or click to browse</p>
-            </div>
-            <input type="file" multiple class="hidden" onchange={uploadFiles} />
-          </label>
-        </div>
-      {/if}
-
-      {#if uploading}
-        <div class="flex items-center gap-3 text-accent-600 mb-4 animate-fade-in">
-          <Loader2 class="w-5 h-5 animate-spin" />
-          <span class="text-sm">Uploading files…</span>
-        </div>
-      {/if}
-
-      {#if selectedFiles.size > 0}
-        <div class="flex items-center gap-2 mb-4 animate-slide-up">
-          <span class="text-sm text-surface-500">{selectedFiles.size} selected</span>
-          <button
-            onclick={deleteSelected}
-            class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-          >
-            <Trash2 class="w-4 h-4" />
-            Delete
-          </button>
-        </div>
-      {/if}
-
-      <!-- File list -->
-      <div class="card overflow-hidden">
-        {#if loading}
-          <div class="p-6 space-y-4">
-            {#each Array(5) as _}
-              <div class="flex items-center gap-4 animate-pulse">
-                <div class="w-10 h-10 rounded-xl bg-surface-200 dark:bg-surface-700"></div>
-                <div class="flex-1 space-y-2">
-                  <div class="w-3/5 h-4 rounded bg-surface-200 dark:bg-surface-700"></div>
-                  <div class="w-2/5 h-3 rounded bg-surface-200 dark:bg-surface-700"></div>
-                </div>
-                <div class="w-16 h-8 rounded-lg bg-surface-200 dark:bg-surface-700"></div>
-              </div>
-            {/each}
-          </div>
-        {:else if (tab === 'myfiles' && files.length === 0) || (tab === 'shared' && sharedFiles.length === 0)}
-          <div class="p-12 text-center">
-            <File class="w-12 h-12 text-surface-300 dark:text-surface-700 mx-auto mb-3" />
-            <p class="text-surface-500 dark:text-surface-400 font-medium">No files yet</p>
-            <p class="text-surface-400 dark:text-surface-500 text-sm mt-1">
-              {tab === 'myfiles' ? 'Upload your first file to get started.' : 'No files have been shared with you.'}
-            </p>
-          </div>
-        {:else}
-          <div class="divide-y divide-surface-100 dark:divide-surface-800">
-            {#each (tab === 'myfiles' ? files : sharedFiles).filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase())) as file (file.id)}
-              <div class="flex items-center gap-4 p-4 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors group">
-                <input
-                  type="checkbox"
-                  checked={selectedFiles.has(file.id)}
-                  onchange={() => toggleSelect(file.id)}
-                  class="w-4 h-4 rounded border-surface-300 dark:border-surface-600 text-accent-600 focus:ring-accent-500 opacity-0 group-hover:opacity-100 {selectedFiles.has(file.id) ? 'opacity-100' : ''}"
-                />
-
-                <div class="flex-shrink-0">
-                  {#if file.mime_type === 'folder'}
-                    <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 cursor-pointer" onclick={() => navigateToFolder(file.name)}>
-                      <Folder class="w-5 h-5" />
-                    </div>
-                  {:else if file.mime_type?.startsWith('image/') && thumbnails[file.id]}
-                    <img src={thumbnails[file.id]} alt={file.name} class="w-10 h-10 rounded-xl object-cover cursor-pointer" onclick={() => openPreview(file)} />
-                  {:else if file.mime_type?.startsWith('video/')}
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 cursor-pointer" onclick={() => openPreview(file)}>
-                      <Video class="w-5 h-5" />
-                    </div>
-                  {:else if file.mime_type === 'application/pdf'}
-                    <div class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600 cursor-pointer" onclick={() => openPreview(file)}>
-                      <FileText class="w-5 h-5" />
-                    </div>
-                  {:else}
-                    <div class="w-10 h-10 rounded-xl bg-surface-100 dark:bg-surface-700 flex items-center justify-center text-surface-500 cursor-pointer" onclick={() => openPreview(file)}>
-                      <File class="w-5 h-5" />
-                    </div>
-                  {/if}
-                </div>
-
-                <div class="flex-1 min-w-0">
-                  {#if renameFileId === file.id}
-                    <input
-                      type="text"
-                      bind:value={renameText}
-                      onkeydown={(e) => e.key === 'Enter' && renameFile(file.id, renameText)}
-                      class="w-full border border-surface-200 dark:border-surface-700 rounded-lg px-2 py-1 text-sm bg-surface-50 dark:bg-surface-800"
-                      onblur={() => renameFile(file.id, renameText)}
-                    />
-                  {:else}
-                    <p class="font-medium text-surface-900 dark:text-white truncate {file.mime_type === 'folder' ? 'cursor-pointer hover:text-accent-600' : ''}" onclick={() => file.mime_type === 'folder' ? navigateToFolder(file.name) : openPreview(file)}>
-                      {file.name}
-                    </p>
-                  {/if}
-                  <p class="text-xs text-surface-400 dark:text-surface-500 mt-0.5">
-                    {file.mime_type === 'folder' ? 'Folder' : `${file.size ? (file.size / 1024).toFixed(1) + ' KB' : 'Unknown size'} · ${new Date(file.created_at).toLocaleDateString()}`}
-                  </p>
-                </div>
-
-                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {#if tab === 'myfiles' && file.mime_type !== 'folder'}
-                    <button onclick={() => { shareFileId = file.id; showShareModal = true }} class="w-8 h-8 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 flex items-center justify-center text-surface-500 dark:text-surface-400 transition-colors" title="Share">
-                      <Share2 class="w-4 h-4" />
-                    </button>
-                    <button onclick={() => showVersions(file.id, file.name)} class="w-8 h-8 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 flex items-center justify-center text-surface-500 dark:text-surface-400 transition-colors" title="Versions">
-                      <History class="w-4 h-4" />
-                    </button>
-                  {/if}
-                  {#if tab === 'myfiles'}
-                    <button onclick={() => { renameFileId = file.id; renameText = file.name }} class="w-8 h-8 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 flex items-center justify-center text-surface-500 dark:text-surface-400 transition-colors" title="Rename">
-                      <Pencil class="w-4 h-4" />
-                    </button>
-                  {/if}
-                  <button onclick={() => getShareLink(file.storage_path)} class="w-8 h-8 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 flex items-center justify-center text-surface-500 dark:text-surface-400 transition-colors" title="Copy link">
-                    <Link2 class="w-4 h-4" />
-                  </button>
-                  <button onclick={async () => { await supabase.from('files').delete().eq('id', file.id); if (tab === 'myfiles') await loadMyFiles(); else await loadSharedFiles(); }} class="w-8 h-8 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center text-surface-500 dark:text-surface-400 hover:text-red-600 dark:hover:text-red-400 transition-colors" title="Delete">
-                    <Trash2 class="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            {/each}
-          </div>
-        {/if}
-      </div>
     </div>
-  </main>
+
+    <!-- Breadcrumb (my files) -->
+    {#if tab === 'myfiles'}
+      <div class="flex items-center gap-2 mb-6 text-sm text-[#a3b18a] overflow-x-auto whitespace-nowrap">
+        <button onclick={() => { folder='/'; loadMyFiles() }} class="hover:text-[#e07a5f] transition-colors flex items-center gap-1">
+          <Folder class="w-4 h-4" />
+          Garden
+        </button>
+        {#each folder.split('/').filter(Boolean) as part, i}
+          <ChevronRight class="w-4 h-4" />
+          <button onclick={() => { folder = '/' + folder.split('/').slice(1, i+1).join('/'); loadMyFiles() }} class="hover:text-[#e07a5f] transition-colors">{part}</button>
+        {/each}
+      </div>
+    {/if}
+
+    <!-- Uploading -->
+    {#if uploading}
+      <div class="flex items-center gap-3 text-[#f4a261] mb-6 animate-pulse">
+        <Loader2 class="w-5 h-5 animate-spin" />
+        <span>Planting your files...</span>
+      </div>
+    {/if}
+
+    <!-- Selection bar -->
+    {#if selectedFiles.size > 0}
+      <div class="flex items-center gap-3 mb-6 animate-slide-up">
+        <span class="text-sm text-[#cfc5b0]">{selectedFiles.size} selected</span>
+        <button onclick={deleteSelected} class="px-3 py-1.5 bg-[#e07a5f]/20 text-[#e07a5f] rounded-full text-sm font-medium hover:bg-[#e07a5f]/30 transition-colors">
+          <Trash2 class="w-4 h-4 inline mr-1" /> Compost
+        </button>
+      </div>
+    {/if}
+
+    <!-- File Grid -->
+    {#if loading}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {#each Array(8) as _}
+          <div class="rounded-3xl bg-[#3d405b]/20 border border-[#a3b18a]/10 p-6 animate-pulse">
+            <div class="w-10 h-10 rounded-2xl bg-[#3d405b]/40 mb-4"></div>
+            <div class="w-3/4 h-5 bg-[#3d405b]/40 rounded mb-2"></div>
+            <div class="w-1/2 h-4 bg-[#3d405b]/40 rounded"></div>
+          </div>
+        {/each}
+      </div>
+    {:else if (tab === 'myfiles' && files.length === 0) || (tab === 'shared' && sharedFiles.length === 0)}
+      <div class="text-center py-24">
+        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#3d405b]/30 border border-[#a3b18a]/20 mb-8">
+          <TreePine class="w-12 h-12 text-[#a3b18a]" />
+        </div>
+        <h3 class="text-2xl font-serif text-[#f5f0e6] mb-3">Your Garden Awaits</h3>
+        <p class="text-[#a3b18a] max-w-md mx-auto">
+          {tab === 'myfiles' ? 'Plant your first file and watch your digital garden grow.' : 'No gifts yet. Share your garden with someone you love.'}
+        </p>
+      </div>
+    {:else}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {#each (tab === 'myfiles' ? files : sharedFiles).filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase())) as file (file.id)}
+          <div
+            class="group relative rounded-3xl bg-[#3d405b]/20 backdrop-blur-md border border-[#a3b18a]/20 hover:border-[#e07a5f]/40 hover:bg-[#3d405b]/30 transition-all duration-500 p-6 cursor-pointer overflow-hidden"
+            onclick={() => file.mime_type === 'folder' ? navigateToFolder(file.name) : openPreview(file)}
+            onkeydown={(e) => e.key === 'Enter' && (file.mime_type === 'folder' ? navigateToFolder(file.name) : openPreview(file))}
+            role="button"
+            tabindex="0"
+          >
+            <!-- Selection check -->
+            <button
+              class="absolute top-4 right-4 w-7 h-7 rounded-full border border-[#a3b18a]/30 flex items-center justify-center opacity-0 group-hover:opacity-100 {selectedFiles.has(file.id) ? 'opacity-100 bg-[#e07a5f] border-[#e07a5f]' : ''} transition-opacity z-10"
+              onclick={(e) => { e.stopPropagation(); toggleSelect(file.id) }}
+            >
+              {#if selectedFiles.has(file.id)}
+                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+              {/if}
+            </button>
+
+            <!-- Icon -->
+            <div class="mb-5">
+              {#if file.mime_type === 'folder'}
+                <div class="w-14 h-14 rounded-2xl bg-[#f4a261]/20 flex items-center justify-center text-[#f4a261]">
+                  <Folder class="w-7 h-7" />
+                </div>
+              {:else if file.mime_type?.startsWith('image/') && thumbnails[file.id]}
+                <img src={thumbnails[file.id]} alt={file.name} class="w-14 h-14 rounded-2xl object-cover" />
+              {:else if file.mime_type?.startsWith('video/')}
+                <div class="w-14 h-14 rounded-2xl bg-[#457b9d]/20 flex items-center justify-center text-[#457b9d]">
+                  <Video class="w-7 h-7" />
+                </div>
+              {:else if file.mime_type === 'application/pdf'}
+                <div class="w-14 h-14 rounded-2xl bg-[#e07a5f]/20 flex items-center justify-center text-[#e07a5f]">
+                  <FileText class="w-7 h-7" />
+                </div>
+              {:else}
+                <div class="w-14 h-14 rounded-2xl bg-[#cfc5b0]/20 flex items-center justify-center text-[#cfc5b0]">
+                  <File class="w-7 h-7" />
+                </div>
+              {/if}
+            </div>
+
+            <!-- Name & size -->
+            <h3 class="font-semibold text-[#f5f0e6] text-lg truncate mb-1">{file.name}</h3>
+            <p class="text-xs text-[#a3b18a]">
+              {file.mime_type === 'folder' ? 'Folder' : `${file.size ? (file.size / 1024).toFixed(1) + ' KB' : ''}`}
+              <span class="mx-1">·</span>
+              {new Date(file.created_at).toLocaleDateString()}
+            </p>
+
+            <!-- Hover actions -->
+            <div class="flex items-center gap-2 mt-5 opacity-0 group-hover:opacity-100 transition-opacity">
+              {#if tab === 'myfiles' && file.mime_type !== 'folder'}
+                <button
+                  onclick={(e) => { e.stopPropagation(); shareFileId = file.id; showShareModal = true }}
+                  class="p-2 rounded-xl bg-white/10 hover:bg-[#e07a5f]/20 text-[#cfc5b0] hover:text-[#e07a5f] transition-all"
+                  title="Share"
+                >
+                  <Share2 class="w-4 h-4" />
+                </button>
+                <button
+                  onclick={(e) => { e.stopPropagation(); showVersions(file.id, file.name) }}
+                  class="p-2 rounded-xl bg-white/10 hover:bg-[#f4a261]/20 text-[#cfc5b0] hover:text-[#f4a261] transition-all"
+                  title="Versions"
+                >
+                  <History class="w-4 h-4" />
+                </button>
+              {/if}
+              {#if tab === 'myfiles'}
+                <button
+                  onclick={(e) => { e.stopPropagation(); renameFileId = file.id; renameText = file.name }}
+                  class="p-2 rounded-xl bg-white/10 hover:bg-[#457b9d]/20 text-[#cfc5b0] hover:text-[#457b9d] transition-all"
+                  title="Rename"
+                >
+                  <Pencil class="w-4 h-4" />
+                </button>
+              {/if}
+              <button
+                onclick={(e) => { e.stopPropagation(); getShareLink(file.storage_path) }}
+                class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-[#cfc5b0] hover:text-white transition-all"
+                title="Copy link"
+              >
+                <Link2 class="w-4 h-4" />
+              </button>
+              <button
+                onclick={(e) => { e.stopPropagation(); supabase.from('files').delete().eq('id', file.id).then(() => { if (tab === 'myfiles') loadMyFiles(); else loadSharedFiles(); }) }}
+                class="p-2 rounded-xl bg-white/10 hover:bg-red-500/20 text-[#cfc5b0] hover:text-red-400 transition-all"
+                title="Delete"
+              >
+                <Trash2 class="w-4 h-4" />
+              </button>
+            </div>
+
+            <!-- Subtle decorative element: a tiny heart in the corner for love theme -->
+            <div class="absolute bottom-3 right-3 opacity-10 group-hover:opacity-30 transition-opacity">
+              <Heart class="w-4 h-4 text-[#f2cc8f]" />
+            </div>
+          </div>
+        {/each}
+      </div>
+    {/if}
+
+  </div>
 </div>
 
-<!-- Share Modal -->
+<!-- Modals with nature theme -->
 {#if showShareModal}
-  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onclick={() => showShareModal = false}>
-    <div class="glass rounded-2xl p-6 w-full max-w-md animate-slide-up" onclick={(e) => e.stopPropagation()}>
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-bold text-surface-900 dark:text-white">Share File</h2>
-        <button onclick={() => showShareModal = false} class="w-8 h-8 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 flex items-center justify-center text-surface-500 transition-colors"><X class="w-4 h-4" /></button>
-      </div>
-      <input type="email" placeholder="User email address" class="w-full px-4 py-3 border border-surface-200 dark:border-surface-700 rounded-xl bg-white/50 dark:bg-surface-900/50 focus:outline-none focus:ring-2 focus:ring-accent-500 mb-4 text-surface-900 dark:text-white placeholder:text-surface-400" bind:value={shareEmail} />
-      <div class="flex gap-3 justify-end">
-        <button onclick={() => showShareModal = false} class="px-4 py-2.5 bg-surface-100 dark:bg-surface-800 rounded-xl text-sm font-medium text-surface-700 dark:text-surface-200 hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors">Cancel</button>
-        <button onclick={shareWithUser} class="px-4 py-2.5 bg-accent-600 hover:bg-accent-700 text-white rounded-xl text-sm font-medium transition-colors active:scale-[0.98]">Share</button>
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onclick={() => showShareModal = false}>
+    <div class="bg-[#2e4a2e] border border-[#a3b18a]/30 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-slide-up" onclick={(e) => e.stopPropagation()}>
+      <h2 class="text-2xl font-serif text-[#f5f0e6] mb-4">Share a Treasure</h2>
+      <input type="email" placeholder="Friend's email" class="w-full px-4 py-3 bg-[#1b2f1d] border border-[#a3b18a]/30 rounded-xl text-[#f5f0e6] placeholder:text-[#a3b18a] focus:outline-none focus:ring-2 focus:ring-[#e07a5f] mb-4" bind:value={shareEmail} />
+      <div class="flex justify-end gap-3">
+        <button onclick={() => showShareModal = false} class="px-5 py-2 bg-[#3d405b]/40 hover:bg-[#3d405b]/60 rounded-full text-[#cfc5b0] transition-colors">Cancel</button>
+        <button onclick={shareWithUser} class="px-5 py-2 bg-gradient-to-r from-[#e07a5f] to-[#f4a261] hover:from-[#d06a4f] hover:to-[#e08a51] rounded-full text-white transition-all">Share</button>
       </div>
     </div>
   </div>
 {/if}
 
-<!-- Versions Modal -->
 {#if showVersionsModal}
-  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onclick={() => showVersionsModal = false}>
-    <div class="glass rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto animate-slide-up" onclick={(e) => e.stopPropagation()}>
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-bold text-surface-900 dark:text-white">Versions of {versionsFileName}</h2>
-        <button onclick={() => showVersionsModal = false} class="w-8 h-8 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 flex items-center justify-center text-surface-500 transition-colors"><X class="w-4 h-4" /></button>
-      </div>
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onclick={() => showVersionsModal = false}>
+    <div class="bg-[#2e4a2e] border border-[#a3b18a]/30 rounded-3xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto shadow-2xl animate-slide-up" onclick={(e) => e.stopPropagation()}>
+      <h2 class="text-2xl font-serif text-[#f5f0e6] mb-4">Past Blossoms of {versionsFileName}</h2>
       {#if versionsList.length === 0}
-        <p class="text-surface-500 dark:text-surface-400 text-sm">No previous versions available.</p>
+        <p class="text-[#a3b18a]">No previous versions.</p>
       {:else}
-        <ul class="space-y-2">
+        <ul class="space-y-3">
           {#each versionsList as version}
-            <li class="flex justify-between items-center p-2 rounded-xl hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors">
+            <li class="flex justify-between items-center p-3 bg-[#1b2f1d] rounded-2xl">
               <div>
-                <span class="font-medium text-surface-900 dark:text-white">v{version.version_number}</span>
-                <span class="text-xs text-surface-400 ml-2">{new Date(version.created_at).toLocaleDateString()}</span>
-                <span class="text-xs text-surface-400 ml-2">{version.size ? (version.size / 1024).toFixed(1) + ' KB' : ''}</span>
+                <span class="font-medium text-[#f5f0e6]">v{version.version_number}</span>
+                <span class="text-xs text-[#a3b18a] ml-2">{new Date(version.created_at).toLocaleDateString()}</span>
+                <span class="text-xs text-[#a3b18a] ml-2">{version.size ? (version.size / 1024).toFixed(1) + ' KB' : ''}</span>
               </div>
-              <button onclick={() => downloadVersion(version.storage_path)} class="text-sm text-accent-600 hover:text-accent-700 font-medium">Download</button>
+              <button onclick={() => downloadVersion(version.storage_path)} class="text-[#f4a261] hover:text-[#e07a5f] text-sm font-medium">Pick</button>
             </li>
           {/each}
         </ul>
       {/if}
+      <div class="mt-4 text-right">
+        <button onclick={() => showVersionsModal = false} class="px-4 py-2 bg-[#3d405b]/40 rounded-full text-[#cfc5b0]">Close</button>
+      </div>
     </div>
   </div>
 {/if}
 
-<!-- Preview Modal -->
 {#if previewFile}
-  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onclick={() => previewFile = null}>
-    <div class="bg-white dark:bg-surface-800 rounded-2xl max-w-4xl max-h-[90vh] overflow-auto w-full animate-slide-up" onclick={(e) => e.stopPropagation()}>
-      <div class="flex justify-between items-center p-4 border-b border-surface-200 dark:border-surface-700">
-        <h3 class="font-bold text-surface-900 dark:text-white">{previewFile.name}</h3>
-        <button onclick={() => previewFile = null} class="w-8 h-8 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 flex items-center justify-center text-surface-500 transition-colors"><X class="w-5 h-5" /></button>
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick={() => previewFile = null}>
+    <div class="bg-[#2e4a2e] border border-[#a3b18a]/30 rounded-3xl max-w-4xl max-h-[90vh] overflow-auto w-full animate-slide-up" onclick={(e) => e.stopPropagation()}>
+      <div class="flex justify-between items-center p-5 border-b border-[#a3b18a]/20">
+        <h3 class="font-serif text-xl text-[#f5f0e6]">{previewFile.name}</h3>
+        <button onclick={() => previewFile = null} class="text-[#cfc5b0] hover:text-white transition-colors"><X class="w-6 h-6" /></button>
       </div>
       <div class="p-4">
         {#if previewFile.type.startsWith('image/')}
-          <img src={previewFile.url} alt={previewFile.name} class="max-w-full max-h-[75vh] object-contain rounded-lg" />
+          <img src={previewFile.url} alt={previewFile.name} class="max-w-full max-h-[75vh] object-contain rounded-2xl" />
         {:else if previewFile.type.startsWith('video/')}
-          <video src={previewFile.url} controls class="max-w-full max-h-[75vh] rounded-lg"></video>
+          <video src={previewFile.url} controls class="max-w-full max-h-[75vh] rounded-2xl"></video>
         {:else if previewFile.type === 'application/pdf'}
-          <iframe src={previewFile.url} class="w-full h-[75vh] rounded-lg"></iframe>
+          <iframe src={previewFile.url} class="w-full h-[75vh] rounded-2xl"></iframe>
         {:else}
-          <p class="text-surface-500 text-center py-8">Preview not available for this file type.</p>
+          <p class="text-center text-[#a3b18a] py-12">Preview not available for this file type.</p>
         {/if}
       </div>
     </div>
