@@ -2,7 +2,7 @@
   import { onMount } from 'svelte'
   import { supabase } from '$lib/supabase'
   import { goto } from '$app/navigation'
-  import { Loader2, FolderPlus, UploadCloud, Trash2, Share2, Pencil, Search, Sun, Moon, LogOut, History, File, Folder, Image, Video, FileText, ChevronRight, X, Link2, Heart, TreePine, Music, Palette, CloudRain } from 'lucide-svelte'
+  import { Loader2, FolderPlus, UploadCloud, Trash2, Share2, Pencil, Search, Sun, Moon, LogOut, History, File, Folder, Image, Video, FileText, ChevronRight, X, Link2, Plus } from 'lucide-svelte'
 
   let files = $state([])
   let sharedFiles = $state([])
@@ -310,130 +310,148 @@
   }
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-[#1b2f1d] via-[#2e4a2e] to-[#1b2f1d] text-[#f5f0e6] p-4 md:p-8 flex flex-col items-center">
-  <!-- Centered container -->
-  <div class="w-full max-w-7xl mx-auto">
-    
-    <!-- Hero – poetic, nature‑inspired -->
-    <div class="text-center mb-14 animate-fade-in">
-      <div class="inline-flex items-center justify-center gap-3 mb-6">
-        <TreePine class="w-10 h-10 text-[#a3b18a]" />
-        <Music class="w-8 h-8 text-[#e07a5f]" />
-        <Palette class="w-8 h-8 text-[#f4a261]" />
-        <Heart class="w-10 h-10 text-[#f2cc8f]" />
+<div class="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">
+  <!-- Top navigation bar (centered) -->
+  <nav class="sticky top-0 z-10 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-6xl mx-auto flex items-center justify-between h-16 px-4 md:px-6">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">☁️</div>
+        <span class="text-lg font-semibold">MyCloud</span>
       </div>
-      <h1 class="text-5xl md:text-7xl font-serif font-bold text-[#f5f0e6] mb-4 tracking-tight">
-        {tab === 'myfiles' ? 'My Garden of Files' : 'Shared with Love'}
-      </h1>
-      <p class="text-lg md:text-xl text-[#cfc5b0] max-w-2xl mx-auto italic">
-        {tab === 'myfiles' ? 'A place where your digital moments bloom like wildflowers. Plant a file, watch it grow.' : 'Treasured gifts from kindred spirits, waiting for your touch.'}
-      </p>
-      <div class="mt-6 flex justify-center gap-3">
-        {#if tab === 'myfiles'}
-          <button onclick={createFolder} class="inline-flex items-center gap-2 px-6 py-3 bg-[#3d405b]/40 hover:bg-[#3d405b]/60 border border-[#a3b18a]/30 rounded-full text-[#f5f0e6] font-medium transition-all duration-300 backdrop-blur-sm">
-            <FolderPlus class="w-5 h-5" />
-            New Folder
-          </button>
-          <label class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#e07a5f] to-[#f4a261] hover:from-[#d06a4f] hover:to-[#e08a51] rounded-full text-white font-medium cursor-pointer transition-all duration-300 shadow-lg shadow-[#e07a5f]/20">
-            <UploadCloud class="w-5 h-5" />
-            Upload
-            <input type="file" multiple class="hidden" onchange={uploadFiles} />
-          </label>
-        {/if}
-        <button onclick={logout} class="inline-flex items-center gap-2 px-5 py-3 text-[#cfc5b0] hover:text-white transition-colors">
-          <LogOut class="w-5 h-5" />
-          <span class="hidden md:inline">Leave Garden</span>
+      <div class="flex items-center gap-3">
+        <button onclick={() => document.documentElement.classList.toggle('dark')} class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle theme">
+          <Sun class="w-5 h-5 hidden dark:block" />
+          <Moon class="w-5 h-5 block dark:hidden" />
+        </button>
+        <button onclick={logout} class="flex items-center gap-1 px-3 py-2 rounded-lg text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <LogOut class="w-4 h-4" />
+          <span class="hidden sm:inline">Logout</span>
         </button>
       </div>
     </div>
+  </nav>
 
-    <!-- Tabs & Search -->
-    <div class="flex flex-col sm:flex-row gap-4 mb-8">
-      <div class="flex gap-2 p-1 bg-[#3d405b]/30 backdrop-blur-md border border-[#a3b18a]/20 rounded-full">
-        <button onclick={() => tab = 'myfiles'} class="px-6 py-2.5 rounded-full font-medium transition-all duration-300 {tab === 'myfiles' ? 'bg-[#e07a5f] text-white shadow-lg' : 'text-[#cfc5b0] hover:text-white'}">
-          My Garden
+  <!-- Main content: centered container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 md:px-6 py-8">
+    
+    <!-- Header area -->
+    <div class="text-center mb-10">
+      <h1 class="text-3xl md:text-4xl font-bold mb-2">
+        {tab === 'myfiles' ? 'Files' : 'Shared with Me'}
+      </h1>
+      <p class="text-slate-500 dark:text-slate-400">
+        {tab === 'myfiles' ? 'Manage your documents, photos, and more.' : 'Files others have shared with you.'}
+      </p>
+    </div>
+
+    <!-- Toolbar: tabs, search, actions (centered) -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+      <div class="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 p-1">
+        <button
+          onclick={() => tab = 'myfiles'}
+          class="px-4 py-2 rounded-md text-sm font-medium transition-colors {tab === 'myfiles' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}"
+        >
+          My Files
         </button>
-        <button onclick={() => tab = 'shared'} class="px-6 py-2.5 rounded-full font-medium transition-all duration-300 {tab === 'shared' ? 'bg-[#e07a5f] text-white shadow-lg' : 'text-[#cfc5b0] hover:text-white'}">
-          Shared with Me
+        <button
+          onclick={() => tab = 'shared'}
+          class="px-4 py-2 rounded-md text-sm font-medium transition-colors {tab === 'shared' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}"
+        >
+          Shared
         </button>
       </div>
-      <div class="relative flex-1">
-        <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a3b18a]" />
+
+      <div class="flex-1 max-w-md w-full relative">
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input
           type="text"
-          placeholder="Search your garden..."
-          class="w-full pl-12 pr-4 py-3 bg-[#3d405b]/30 backdrop-blur-md border border-[#a3b18a]/20 rounded-full text-[#f5f0e6] placeholder:text-[#a3b18a] focus:outline-none focus:ring-2 focus:ring-[#e07a5f] focus:border-transparent transition-all"
+          placeholder="Search..."
+          class="w-full pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-slate-400"
           bind:value={searchQuery}
         />
       </div>
+
+      {#if tab === 'myfiles'}
+        <div class="flex items-center gap-2">
+          <button
+            onclick={createFolder}
+            class="inline-flex items-center gap-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <FolderPlus class="w-4 h-4" />
+            New Folder
+          </button>
+          <label class="inline-flex items-center gap-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium cursor-pointer transition-colors">
+            <UploadCloud class="w-4 h-4" />
+            Upload
+            <input type="file" multiple class="hidden" onchange={uploadFiles} />
+          </label>
+        </div>
+      {/if}
     </div>
 
-    <!-- Breadcrumb (my files) -->
+    <!-- Breadcrumb (my files only) -->
     {#if tab === 'myfiles'}
-      <div class="flex items-center gap-2 mb-6 text-sm text-[#a3b18a] overflow-x-auto whitespace-nowrap">
-        <button onclick={() => { folder='/'; loadMyFiles() }} class="hover:text-[#e07a5f] transition-colors flex items-center gap-1">
-          <Folder class="w-4 h-4" />
-          Garden
-        </button>
+      <div class="flex items-center justify-center gap-1 text-sm text-slate-500 dark:text-slate-400 mb-6">
+        <button onclick={() => { folder='/'; loadMyFiles() }} class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Home</button>
         {#each folder.split('/').filter(Boolean) as part, i}
           <ChevronRight class="w-4 h-4" />
-          <button onclick={() => { folder = '/' + folder.split('/').slice(1, i+1).join('/'); loadMyFiles() }} class="hover:text-[#e07a5f] transition-colors">{part}</button>
+          <button onclick={() => { folder = '/' + folder.split('/').slice(1, i+1).join('/'); loadMyFiles() }} class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{part}</button>
         {/each}
       </div>
     {/if}
 
-    <!-- Uploading -->
+    <!-- Uploading indicator -->
     {#if uploading}
-      <div class="flex items-center gap-3 text-[#f4a261] mb-6 animate-pulse">
+      <div class="flex items-center justify-center gap-2 text-indigo-600 dark:text-indigo-400 mb-6">
         <Loader2 class="w-5 h-5 animate-spin" />
-        <span>Planting your files...</span>
+        <span class="text-sm">Uploading files...</span>
       </div>
     {/if}
 
-    <!-- Selection bar -->
+    <!-- Selection actions -->
     {#if selectedFiles.size > 0}
-      <div class="flex items-center gap-3 mb-6 animate-slide-up">
-        <span class="text-sm text-[#cfc5b0]">{selectedFiles.size} selected</span>
-        <button onclick={deleteSelected} class="px-3 py-1.5 bg-[#e07a5f]/20 text-[#e07a5f] rounded-full text-sm font-medium hover:bg-[#e07a5f]/30 transition-colors">
-          <Trash2 class="w-4 h-4 inline mr-1" /> Compost
+      <div class="flex items-center justify-center gap-3 mb-6">
+        <span class="text-sm text-slate-500">{selectedFiles.size} selected</span>
+        <button onclick={deleteSelected} class="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+          <Trash2 class="w-4 h-4 inline mr-1" /> Delete
         </button>
       </div>
     {/if}
 
-    <!-- File Grid -->
+    <!-- File grid (centered, equally spaced) -->
     {#if loading}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {#each Array(8) as _}
-          <div class="rounded-3xl bg-[#3d405b]/20 border border-[#a3b18a]/10 p-6 animate-pulse">
-            <div class="w-10 h-10 rounded-2xl bg-[#3d405b]/40 mb-4"></div>
-            <div class="w-3/4 h-5 bg-[#3d405b]/40 rounded mb-2"></div>
-            <div class="w-1/2 h-4 bg-[#3d405b]/40 rounded"></div>
+          <div class="rounded-xl border border-slate-200 dark:border-slate-800 p-4 animate-pulse">
+            <div class="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-800 mb-3"></div>
+            <div class="w-3/4 h-4 bg-slate-200 dark:bg-slate-800 rounded mb-2"></div>
+            <div class="w-1/2 h-3 bg-slate-200 dark:bg-slate-800 rounded"></div>
           </div>
         {/each}
       </div>
     {:else if (tab === 'myfiles' && files.length === 0) || (tab === 'shared' && sharedFiles.length === 0)}
-      <div class="text-center py-24">
-        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#3d405b]/30 border border-[#a3b18a]/20 mb-8">
-          <TreePine class="w-12 h-12 text-[#a3b18a]" />
+      <div class="text-center py-20">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+          <File class="w-8 h-8 text-slate-400" />
         </div>
-        <h3 class="text-2xl font-serif text-[#f5f0e6] mb-3">Your Garden Awaits</h3>
-        <p class="text-[#a3b18a] max-w-md mx-auto">
-          {tab === 'myfiles' ? 'Plant your first file and watch your digital garden grow.' : 'No gifts yet. Share your garden with someone you love.'}
+        <h3 class="text-lg font-medium text-slate-900 dark:text-white mb-1">No files yet</h3>
+        <p class="text-slate-500 dark:text-slate-400 text-sm">
+          {tab === 'myfiles' ? 'Upload your first file or create a folder.' : 'No one has shared files with you.'}
         </p>
       </div>
     {:else}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {#each (tab === 'myfiles' ? files : sharedFiles).filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase())) as file (file.id)}
           <div
-            class="group relative rounded-3xl bg-[#3d405b]/20 backdrop-blur-md border border-[#a3b18a]/20 hover:border-[#e07a5f]/40 hover:bg-[#3d405b]/30 transition-all duration-500 p-6 cursor-pointer overflow-hidden"
+            class="group relative rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer"
             onclick={() => file.mime_type === 'folder' ? navigateToFolder(file.name) : openPreview(file)}
             onkeydown={(e) => e.key === 'Enter' && (file.mime_type === 'folder' ? navigateToFolder(file.name) : openPreview(file))}
             role="button"
             tabindex="0"
           >
-            <!-- Selection check -->
+            <!-- Selection checkbox -->
             <button
-              class="absolute top-4 right-4 w-7 h-7 rounded-full border border-[#a3b18a]/30 flex items-center justify-center opacity-0 group-hover:opacity-100 {selectedFiles.has(file.id) ? 'opacity-100 bg-[#e07a5f] border-[#e07a5f]' : ''} transition-opacity z-10"
+              class="absolute top-3 right-3 w-6 h-6 rounded border border-slate-300 dark:border-slate-600 flex items-center justify-center opacity-0 group-hover:opacity-100 {selectedFiles.has(file.id) ? 'opacity-100 bg-indigo-600 border-indigo-600' : ''} transition-opacity"
               onclick={(e) => { e.stopPropagation(); toggleSelect(file.id) }}
             >
               {#if selectedFiles.has(file.id)}
@@ -442,49 +460,48 @@
             </button>
 
             <!-- Icon -->
-            <div class="mb-5">
+            <div class="mb-4">
               {#if file.mime_type === 'folder'}
-                <div class="w-14 h-14 rounded-2xl bg-[#f4a261]/20 flex items-center justify-center text-[#f4a261]">
-                  <Folder class="w-7 h-7" />
+                <div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                  <Folder class="w-5 h-5" />
                 </div>
               {:else if file.mime_type?.startsWith('image/') && thumbnails[file.id]}
-                <img src={thumbnails[file.id]} alt={file.name} class="w-14 h-14 rounded-2xl object-cover" />
+                <img src={thumbnails[file.id]} alt={file.name} class="w-10 h-10 rounded-lg object-cover" />
               {:else if file.mime_type?.startsWith('video/')}
-                <div class="w-14 h-14 rounded-2xl bg-[#457b9d]/20 flex items-center justify-center text-[#457b9d]">
-                  <Video class="w-7 h-7" />
+                <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <Video class="w-5 h-5" />
                 </div>
               {:else if file.mime_type === 'application/pdf'}
-                <div class="w-14 h-14 rounded-2xl bg-[#e07a5f]/20 flex items-center justify-center text-[#e07a5f]">
-                  <FileText class="w-7 h-7" />
+                <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                  <FileText class="w-5 h-5" />
                 </div>
               {:else}
-                <div class="w-14 h-14 rounded-2xl bg-[#cfc5b0]/20 flex items-center justify-center text-[#cfc5b0]">
-                  <File class="w-7 h-7" />
+                <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+                  <File class="w-5 h-5" />
                 </div>
               {/if}
             </div>
 
-            <!-- Name & size -->
-            <h3 class="font-semibold text-[#f5f0e6] text-lg truncate mb-1">{file.name}</h3>
-            <p class="text-xs text-[#a3b18a]">
+            <!-- File name & meta -->
+            <h3 class="font-semibold text-sm text-slate-900 dark:text-white truncate mb-1">{file.name}</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
               {file.mime_type === 'folder' ? 'Folder' : `${file.size ? (file.size / 1024).toFixed(1) + ' KB' : ''}`}
-              <span class="mx-1">·</span>
-              {new Date(file.created_at).toLocaleDateString()}
+              {!file.mime_type?.startsWith('folder') ? ' · ' + new Date(file.created_at).toLocaleDateString() : ''}
             </p>
 
             <!-- Hover actions -->
-            <div class="flex items-center gap-2 mt-5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div class="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
               {#if tab === 'myfiles' && file.mime_type !== 'folder'}
                 <button
                   onclick={(e) => { e.stopPropagation(); shareFileId = file.id; showShareModal = true }}
-                  class="p-2 rounded-xl bg-white/10 hover:bg-[#e07a5f]/20 text-[#cfc5b0] hover:text-[#e07a5f] transition-all"
+                  class="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-600 transition-colors"
                   title="Share"
                 >
                   <Share2 class="w-4 h-4" />
                 </button>
                 <button
                   onclick={(e) => { e.stopPropagation(); showVersions(file.id, file.name) }}
-                  class="p-2 rounded-xl bg-white/10 hover:bg-[#f4a261]/20 text-[#cfc5b0] hover:text-[#f4a261] transition-all"
+                  class="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-600 transition-colors"
                   title="Versions"
                 >
                   <History class="w-4 h-4" />
@@ -493,7 +510,7 @@
               {#if tab === 'myfiles'}
                 <button
                   onclick={(e) => { e.stopPropagation(); renameFileId = file.id; renameText = file.name }}
-                  class="p-2 rounded-xl bg-white/10 hover:bg-[#457b9d]/20 text-[#cfc5b0] hover:text-[#457b9d] transition-all"
+                  class="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-600 transition-colors"
                   title="Rename"
                 >
                   <Pencil class="w-4 h-4" />
@@ -501,89 +518,83 @@
               {/if}
               <button
                 onclick={(e) => { e.stopPropagation(); getShareLink(file.storage_path) }}
-                class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-[#cfc5b0] hover:text-white transition-all"
+                class="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-600 transition-colors"
                 title="Copy link"
               >
                 <Link2 class="w-4 h-4" />
               </button>
               <button
                 onclick={(e) => { e.stopPropagation(); supabase.from('files').delete().eq('id', file.id).then(() => { if (tab === 'myfiles') loadMyFiles(); else loadSharedFiles(); }) }}
-                class="p-2 rounded-xl bg-white/10 hover:bg-red-500/20 text-[#cfc5b0] hover:text-red-400 transition-all"
+                class="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-600 transition-colors"
                 title="Delete"
               >
                 <Trash2 class="w-4 h-4" />
               </button>
             </div>
-
-            <!-- Subtle decorative element: a tiny heart in the corner for love theme -->
-            <div class="absolute bottom-3 right-3 opacity-10 group-hover:opacity-30 transition-opacity">
-              <Heart class="w-4 h-4 text-[#f2cc8f]" />
-            </div>
           </div>
         {/each}
       </div>
     {/if}
-
-  </div>
+  </main>
 </div>
 
-<!-- Modals with nature theme -->
+<!-- Modals (centered, clean) -->
 {#if showShareModal}
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onclick={() => showShareModal = false}>
-    <div class="bg-[#2e4a2e] border border-[#a3b18a]/30 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-slide-up" onclick={(e) => e.stopPropagation()}>
-      <h2 class="text-2xl font-serif text-[#f5f0e6] mb-4">Share a Treasure</h2>
-      <input type="email" placeholder="Friend's email" class="w-full px-4 py-3 bg-[#1b2f1d] border border-[#a3b18a]/30 rounded-xl text-[#f5f0e6] placeholder:text-[#a3b18a] focus:outline-none focus:ring-2 focus:ring-[#e07a5f] mb-4" bind:value={shareEmail} />
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm" onclick={() => showShareModal = false}>
+    <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl p-6 w-full max-w-md" onclick={(e) => e.stopPropagation()}>
+      <h2 class="text-lg font-semibold mb-4">Share File</h2>
+      <input type="email" placeholder="User email" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4" bind:value={shareEmail} />
       <div class="flex justify-end gap-3">
-        <button onclick={() => showShareModal = false} class="px-5 py-2 bg-[#3d405b]/40 hover:bg-[#3d405b]/60 rounded-full text-[#cfc5b0] transition-colors">Cancel</button>
-        <button onclick={shareWithUser} class="px-5 py-2 bg-gradient-to-r from-[#e07a5f] to-[#f4a261] hover:from-[#d06a4f] hover:to-[#e08a51] rounded-full text-white transition-all">Share</button>
+        <button onclick={() => showShareModal = false} class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+        <button onclick={shareWithUser} class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors">Share</button>
       </div>
     </div>
   </div>
 {/if}
 
 {#if showVersionsModal}
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onclick={() => showVersionsModal = false}>
-    <div class="bg-[#2e4a2e] border border-[#a3b18a]/30 rounded-3xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto shadow-2xl animate-slide-up" onclick={(e) => e.stopPropagation()}>
-      <h2 class="text-2xl font-serif text-[#f5f0e6] mb-4">Past Blossoms of {versionsFileName}</h2>
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm" onclick={() => showVersionsModal = false}>
+    <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto" onclick={(e) => e.stopPropagation()}>
+      <h2 class="text-lg font-semibold mb-4">Versions of {versionsFileName}</h2>
       {#if versionsList.length === 0}
-        <p class="text-[#a3b18a]">No previous versions.</p>
+        <p class="text-sm text-slate-500">No previous versions.</p>
       {:else}
-        <ul class="space-y-3">
+        <ul class="space-y-2">
           {#each versionsList as version}
-            <li class="flex justify-between items-center p-3 bg-[#1b2f1d] rounded-2xl">
+            <li class="flex justify-between items-center p-2 rounded-lg border border-slate-200 dark:border-slate-800">
               <div>
-                <span class="font-medium text-[#f5f0e6]">v{version.version_number}</span>
-                <span class="text-xs text-[#a3b18a] ml-2">{new Date(version.created_at).toLocaleDateString()}</span>
-                <span class="text-xs text-[#a3b18a] ml-2">{version.size ? (version.size / 1024).toFixed(1) + ' KB' : ''}</span>
+                <span class="font-medium text-sm">v{version.version_number}</span>
+                <span class="text-xs text-slate-500 ml-2">{new Date(version.created_at).toLocaleDateString()}</span>
+                <span class="text-xs text-slate-500 ml-2">{version.size ? (version.size / 1024).toFixed(1) + ' KB' : ''}</span>
               </div>
-              <button onclick={() => downloadVersion(version.storage_path)} class="text-[#f4a261] hover:text-[#e07a5f] text-sm font-medium">Pick</button>
+              <button onclick={() => downloadVersion(version.storage_path)} class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Download</button>
             </li>
           {/each}
         </ul>
       {/if}
       <div class="mt-4 text-right">
-        <button onclick={() => showVersionsModal = false} class="px-4 py-2 bg-[#3d405b]/40 rounded-full text-[#cfc5b0]">Close</button>
+        <button onclick={() => showVersionsModal = false} class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Close</button>
       </div>
     </div>
   </div>
 {/if}
 
 {#if previewFile}
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick={() => previewFile = null}>
-    <div class="bg-[#2e4a2e] border border-[#a3b18a]/30 rounded-3xl max-w-4xl max-h-[90vh] overflow-auto w-full animate-slide-up" onclick={(e) => e.stopPropagation()}>
-      <div class="flex justify-between items-center p-5 border-b border-[#a3b18a]/20">
-        <h3 class="font-serif text-xl text-[#f5f0e6]">{previewFile.name}</h3>
-        <button onclick={() => previewFile = null} class="text-[#cfc5b0] hover:text-white transition-colors"><X class="w-6 h-6" /></button>
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onclick={() => previewFile = null}>
+    <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-4xl max-h-[90vh] overflow-auto w-full" onclick={(e) => e.stopPropagation()}>
+      <div class="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-800">
+        <h3 class="font-semibold text-lg">{previewFile.name}</h3>
+        <button onclick={() => previewFile = null} class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"><X class="w-5 h-5" /></button>
       </div>
       <div class="p-4">
         {#if previewFile.type.startsWith('image/')}
-          <img src={previewFile.url} alt={previewFile.name} class="max-w-full max-h-[75vh] object-contain rounded-2xl" />
+          <img src={previewFile.url} alt={previewFile.name} class="max-w-full max-h-[75vh] object-contain rounded" />
         {:else if previewFile.type.startsWith('video/')}
-          <video src={previewFile.url} controls class="max-w-full max-h-[75vh] rounded-2xl"></video>
+          <video src={previewFile.url} controls class="max-w-full max-h-[75vh] rounded"></video>
         {:else if previewFile.type === 'application/pdf'}
-          <iframe src={previewFile.url} class="w-full h-[75vh] rounded-2xl"></iframe>
+          <iframe src={previewFile.url} class="w-full h-[75vh] rounded"></iframe>
         {:else}
-          <p class="text-center text-[#a3b18a] py-12">Preview not available for this file type.</p>
+          <p class="text-center text-slate-500 py-12">Preview not available for this file type.</p>
         {/if}
       </div>
     </div>

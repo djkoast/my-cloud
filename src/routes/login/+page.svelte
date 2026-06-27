@@ -44,47 +44,41 @@
   }
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-accent-50 via-white to-surface-100 dark:from-surface-950 dark:via-surface-900 dark:to-surface-950 p-4">
-  <div class="w-full max-w-md animate-fade-in">
-    <!-- Logo & title -->
+<div class="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950 p-4">
+  <div class="w-full max-w-md">
     <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-500/10 text-accent-600 mb-4">
-        <Cloud class="w-8 h-8" />
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 mb-4">
+        <Cloud class="w-7 h-7" />
       </div>
-      <h1 class="text-3xl font-bold text-surface-900 dark:text-white">MyCloud</h1>
-      <p class="text-surface-500 dark:text-surface-400 mt-1">Sign in to your secure storage</p>
+      <h1 class="text-3xl font-bold text-slate-900 dark:text-white">MyCloud</h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">Sign in to your account</p>
     </div>
 
-    <!-- Card -->
-    <div class="glass rounded-3xl p-8 transition-all duration-300">
-      <div class="space-y-5">
+    <div class="border border-slate-200 dark:border-slate-800 rounded-2xl p-6 bg-white dark:bg-slate-900 shadow-sm">
+      <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Email</label>
-          <div class="relative">
-            <input
-              type="email"
-              placeholder="you@example.com"
-              class="w-full px-4 py-3 border border-surface-200 dark:border-surface-700 rounded-xl bg-white/50 dark:bg-surface-900/50 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all text-surface-900 dark:text-white placeholder:text-surface-400"
-              bind:value={email}
-            />
-          </div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            bind:value={email}
+          />
         </div>
-
         <div>
-          <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1.5">Password</label>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
           <input
             type="password"
             placeholder="••••••••"
-            class="w-full px-4 py-3 border border-surface-200 dark:border-surface-700 rounded-xl bg-white/50 dark:bg-surface-900/50 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all text-surface-900 dark:text-white placeholder:text-surface-400"
+            class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             bind:value={password}
           />
         </div>
-
         <div class="flex gap-3 pt-2">
           <button
             onclick={handleLogin}
             disabled={loading}
-            class="flex-1 bg-accent-600 hover:bg-accent-700 disabled:opacity-60 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+            class="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             {#if loading}
               <Loader2 class="w-4 h-4 animate-spin" />
@@ -97,28 +91,25 @@
           <button
             onclick={handleSignUp}
             disabled={loading}
-            class="flex-1 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-700 disabled:opacity-60 text-surface-700 dark:text-surface-200 font-semibold py-3 px-6 rounded-xl transition-all active:scale-[0.98]"
+            class="flex-1 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-60 text-slate-700 dark:text-slate-300 font-medium py-2.5 rounded-lg transition-colors"
           >
             Sign Up
           </button>
         </div>
-
         {#if message}
-          <div class="text-sm text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl animate-fade-in">
+          <div class="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
             {message}
           </div>
         {/if}
-
         <div class="text-center">
-          <a href="/forgot-password" class="text-sm text-accent-600 hover:text-accent-700 dark:text-accent-400 transition-colors">
+          <a href="/forgot-password" class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 transition-colors">
             Forgot password?
           </a>
         </div>
       </div>
     </div>
-
-    <p class="text-center text-xs text-surface-400 mt-6">
-      Secure cloud storage • Built with ❤️
+    <p class="text-center text-xs text-slate-400 mt-6">
+      Secure cloud storage
     </p>
   </div>
 </div>
