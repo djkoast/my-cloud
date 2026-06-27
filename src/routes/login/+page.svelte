@@ -45,8 +45,8 @@
 </script>
 
 <div class="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950 p-4">
-  <div class="w-full max-w-md">
-    <div class="text-center mb-8">
+  <div class="mx-auto max-w-md w-full text-center">
+    <div class="mb-8">
       <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 mb-4">
         <Cloud class="w-7 h-7" />
       </div>
@@ -54,7 +54,7 @@
       <p class="text-slate-500 dark:text-slate-400 mt-1">Sign in to your account</p>
     </div>
 
-    <div class="border border-slate-200 dark:border-slate-800 rounded-2xl p-6 bg-white dark:bg-slate-900 shadow-sm">
+    <div class="border border-slate-200 dark:border-slate-800 rounded-2xl p-6 bg-white dark:bg-slate-900 shadow-sm text-left">
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
